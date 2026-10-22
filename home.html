@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة الأستاذ وائل الشيخ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+.bar-in{max-width:980px}
+.brand{flex:1;min-width:0;line-height:1.2;display:flex;flex-direction:column}
+.brand .en{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.2rem;direction:ltr;text-align:right;color:var(--ink)}
+.brand .en b{color:var(--red);font-weight:700}
+.brand .ar{font-size:.78rem;color:var(--mute);font-weight:700}
+.ibtn{position:relative;width:42px;height:42px;border-radius:10px;border:1.5px solid #c5ccd8;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center}
+.ibtn:hover{border-color:var(--ink)}
+.ibtn svg{width:20px;height:20px}
+.bell-count{position:absolute;top:-7px;left:-7px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:var(--red);color:#fff;font-size:.7rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff}
+
+/* قائمة جانبية */
+.overlay{position:fixed;inset:0;background:rgba(16,26,46,.5);z-index:40;display:none}
+.overlay.active{display:block}
+.dropdown-menu{position:fixed;top:0;bottom:0;right:0;width:270px;max-width:82vw;background:#fff;z-index:50;transform:translateX(100%);transition:transform .22s;display:flex;flex-direction:column}
+.dropdown-menu.active{transform:none}
+.menu-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--ink);color:#fff}
+.menu-header h3{font-family:var(--display);font-weight:400;font-size:1.3rem}
+.close-menu{background:none;border:0;color:#fff;display:flex}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 18px;text-decoration:none;font-weight:700;border-bottom:1px solid var(--line2);color:var(--ink)}
+.menu-item svg{color:var(--red)}
+.menu-item:hover{background:#f6f7f9}
+
+/* الغلاف: الصورة كاملة، وعليها زرار محاضراتك بس */
+.hero{background:var(--ink)}
+.hero-pic{position:relative;max-width:560px;margin:0 auto}
+.hero-pic img{display:block;width:100%;height:auto}
+.btn-gold{position:absolute;bottom:18px;right:18px;display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--ink);padding:11px 26px;border-radius:8px;font-weight:800;text-decoration:none;font-size:1rem;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+.btn-gold:hover{background:#ffc43d}
+@media(max-width:600px){.hero-pic{max-width:none}}
+@media(min-width:601px){.hero-pic img{max-height:640px;width:auto;margin:0 auto}.hero-pic{display:flex;justify-content:center}.btn-gold{right:auto;bottom:22px;left:50%;transform:translateX(-50%)}}
+
+.h-title{display:flex;align-items:center;gap:12px;margin:28px 0 14px}
+.h-title h2{font-family:var(--display);font-weight:400;font-size:1.65rem;line-height:1.2}
+.h-title::before{content:"";width:6px;height:28px;background:var(--red);border-radius:2px}
+.h-title small{color:var(--mute);font-size:.88rem;margin-right:auto}
+
+/* باقات: شكل تذكرة */
+.packages-grid{display:grid;gap:16px;grid-template-columns:1fr}
+.ticket{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.ticket:hover{border-color:var(--ink)}
+.ticket .pic{aspect-ratio:16/9;background:#e8ebf0}
+.ticket .pic img{width:100%;height:100%;object-fit:cover}
+.ticket .perf{position:relative;height:0;border-top:2px dashed #cfd5df;margin:0 18px}
+.ticket .perf::before,.ticket .perf::after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.ticket .perf::before{right:-29px}.ticket .perf::after{left:-29px}
+.ticket .info{padding:14px 18px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ticket h3{font-family:var(--display);font-weight:400;font-size:1.35rem;line-height:1.35}
+.ticket p{color:var(--mute);font-size:.88rem;line-height:1.7;flex:1}
+.pkg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.price{font-family:var(--display);font-size:1.9rem;line-height:1;color:var(--red)}
+.price span{font-family:'Cairo';font-size:.85rem;color:var(--mute);font-weight:700}
+.package-btn{border:0;border-radius:8px;padding:9px 20px;font-weight:800;background:var(--red);color:#fff;font-size:.92rem}
+.package-btn.ok{background:var(--ok)}.package-btn.wait{background:#9aa3b2}
+.pkg-badge{align-self:flex-start;font-size:.78rem;font-weight:700;padding:1px 9px;border-radius:4px}
+.pkg-badge.active{background:var(--ok-soft);color:var(--ok)}
+.pkg-badge.pending{background:var(--warn-soft);color:var(--warn)}
+.pkg-badge.rejected{background:#fdf1f0;color:var(--bad)}
+.loading-box{grid-column:1/-1;text-align:center;color:var(--mute);padding:34px 10px;line-height:2}
+
+/* الستور */
+.store{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px;margin:0 -16px;padding:0 16px 8px;scrollbar-width:thin}
+.product{flex:0 0 168px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.product:nth-child(even){margin-top:14px}
+.product .im{aspect-ratio:1;background:#eef0f4}
+.product .im img{width:100%;height:100%;object-fit:cover}
+.product .pi{padding:10px 12px 12px}
+.product h4{font-weight:800;font-size:.98rem}
+.product .pr{font-family:var(--display);font-size:1.25rem;color:var(--red);line-height:1.4}
+.add-to-cart{margin-top:4px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:8px;padding:6px;font-weight:700;font-size:.85rem}
+.add-to-cart:hover{background:var(--ink);color:#fff}
+
+/* الدعم */
+.support{margin-top:34px;display:grid;grid-template-columns:132px 1fr;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.support .sp-img{background:#e8ebf0}
+.support .sp-img img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.sp-body{padding:16px 16px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.sp-body .l{font-family:var(--display);font-size:1.3rem;line-height:1.3}
+.sp-body .s{color:var(--mute);font-size:.84rem;font-weight:600}
+.sp-body .n{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.45rem;direction:ltr;text-align:right;color:var(--red);margin:6px 0 8px;letter-spacing:.5px}
+.sp-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sp-btns a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:800;font-size:.88rem;text-decoration:none}
+.sp-call{background:var(--ink);color:#fff}
+.sp-wa{background:#fff;color:#12843f;border:1.5px solid #12843f}
+@media(min-width:640px){.support{grid-template-columns:240px 1fr}.sp-body{padding:24px}.sp-body .n{font-size:1.9rem}}
+
+/* الفوتر */
+.foot{margin-top:46px;background:#fff;border-top:3px solid var(--red)}
+.foot-in{max-width:980px;margin:0 auto;padding:22px 16px 26px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.foot .fb{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.05rem;direction:ltr;color:var(--ink)}
+.foot .fb b{color:var(--red)}
+.foot .rights{color:var(--ink2);font-weight:700;font-size:.92rem}
+.foot .dev{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.88rem;border:1.5px solid #c5ccd8;border-radius:999px;padding:6px 16px}
+.foot .dev b{font-family:'Poppins',sans-serif;font-weight:700;color:var(--red)}
+.foot .dev:hover{border-color:var(--ink)}
+.foot .dev svg{width:15px;height:15px;color:var(--mute)}
+
+/* السلة والإشعارات */
+.cart-badge{position:fixed;bottom:18px;left:16px;z-index:35;width:52px;height:52px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(16,26,46,.3);cursor:pointer}
+.cart-badge svg{width:24px;height:24px}
+.cart-count{position:absolute;top:-4px;right:-4px;min-width:21px;height:21px;border-radius:11px;background:var(--ink);color:#fff;font-size:.74rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.cart-modal{position:fixed;inset:0;background:rgba(16,26,46,.55);z-index:90;display:none;align-items:flex-end;justify-content:center}
+.cart-modal.active{display:flex}
+.cart-box{background:#fff;width:100%;max-width:480px;max-height:84vh;overflow:auto;border-radius:16px 16px 0 0;padding:0 0 18px}
+.cart-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.cart-header h3{font-family:var(--display);font-weight:400;font-size:1.35rem}
+.close-cart{background:none;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;font-size:1rem;color:var(--mute)}
+#cartItems,#notifList{padding:6px 18px}
+.cart-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.cart-item h4{font-size:.98rem}.cart-item-price{color:var(--mute);font-size:.85rem}
+.remove-item{background:none;border:0;color:var(--bad);font-weight:700;font-size:.85rem}
+.empty-cart{text-align:center;color:var(--mute);padding:30px 0}
+.cart-total{padding:10px 18px;font-family:var(--display);font-size:1.5rem;color:var(--red)}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 36px);margin:4px 18px 0;padding:12px;border:0;border-radius:8px;background:#1d9d52;color:#fff;font-weight:800;font-size:1rem}
+.notif-item{padding:12px 12px 12px 6px;border-bottom:1px solid var(--line2);border-right:3px solid transparent;padding-right:12px}
+.notif-item.unread{border-right-color:var(--red);background:#fffafa}
+.notif-item h4{font-size:.98rem}.notif-item p{color:var(--ink2);font-size:.9rem;line-height:1.7}.notif-item small{color:var(--mute);font-size:.78rem}
+
+@media(min-width:640px){
+ .packages-grid{grid-template-columns:1fr 1fr}
+ .cart-modal{align-items:center}.cart-box{border-radius:14px}
+ .product{flex-basis:200px}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">
+      <div class="en">Wael <b>El-Sheikh</b></div>
+      <div class="ar">معلم أول "English"</div>
+    </div>
+    <button class="ibtn" onclick="showNotifs()" title="الإشعارات" aria-label="الإشعارات"><svg class="i"><use href="#i-bell"/></svg><span class="bell-count" id="bellCount">0</span></button>
+    <button class="ibtn" onclick="toggleMenu()" aria-label="القائمة"><svg class="i"><use href="#i-menu"/></svg></button>
+  </div>
+</header>
+
+<div class="overlay" onclick="closeAll()"></div>
+<nav class="dropdown-menu" id="dropdownMenu">
+  <div class="menu-header"><h3>القائمة</h3><button class="close-menu" onclick="toggleMenu()" aria-label="إغلاق"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <a href="profile.html" class="menu-item"><svg class="i"><use href="#i-user"/></svg><span>الملف الشخصي</span></a>
+  <a href="#" class="menu-item" onclick="goPackages(); return false;"><svg class="i"><use href="#i-book"/></svg><span>المحاضرات</span></a>
+  <a href="#" class="menu-item" onclick="showNotifs(); return false;"><svg class="i"><use href="#i-bell"/></svg><span>الإشعارات</span></a>
+  <a href="#" class="menu-item" onclick="showCart(); return false;"><svg class="i"><use href="#i-cart"/></svg><span>سلة المشتريات</span></a>
+  <a href="#" class="menu-item" onclick="logout(); return false;"><svg class="i"><use href="#i-out"/></svg><span>تسجيل الخروج</span></a>
+</nav>
+
+<section class="hero">
+  <div class="hero-pic">
+    <img id="heroImg" src="hero.webp" alt="مستر وائل الشيخ">
+    <a href="#" class="btn-gold" onclick="goPackages(); return false;"><svg class="i"><use href="#i-play"/></svg>محاضراتك</a>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="h-title" id="packagesSection"><h2>كل ما يخص المنهج</h2></div>
+  <div class="packages-grid" id="packagesGrid"><div class="loading-box">جاري تحميل الباقات...</div></div>
+
+  <div class="h-title"><h2>غاوي ستور</h2><small>أدوات تساعدك تذاكر</small></div>
+  <div class="store" id="productsTrack"></div>
+
+  <section class="support">
+    <div class="sp-img"><img id="contactImg" src="contact.webp" alt="" loading="lazy"></div>
+    <div class="sp-body">
+      <div class="l">محتاج مساعدة؟</div>
+      <div class="s">فريق الدعم بيرد عليك في أقرب وقت</div>
+      <div class="n" id="supportNumber">01505786505</div>
+      <div class="sp-btns">
+        <a class="sp-call" id="supCall" href="tel:01505786505"><svg class="i"><use href="#i-phone"/></svg>اتصال</a>
+        <a class="sp-wa" id="supWa" href="#" target="_blank" rel="noopener">واتساب</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div class="fb">Wael <b>El-Sheikh</b></div>
+    <div class="rights">جميع الحقوق محفوظة © <span id="yr">2026</span></div>
+    <a class="dev" id="devLink" href="#" target="_blank" rel="noopener noreferrer"><span>تطوير: <b>ziad alaa</b></span><svg class="i"><use href="#i-arrow"/></svg></a>
+  </div>
+</footer>
+
+<div class="cart-badge" onclick="showCart()" role="button" aria-label="السلة"><svg class="i"><use href="#i-cart"/></svg><span class="cart-count" id="cartCount">0</span></div>
+
+<div class="cart-modal" id="cartModal" onclick="if(event.target===this)closeCart()">
+  <div class="cart-box">
+    <div class="cart-header"><h3>سلة المشتريات</h3><button class="close-cart" onclick="closeCart()">✕</button></div>
+    <div id="cartItems"></div>
+    <div class="cart-total" id="cartTotal"></div>
+    <button class="whatsapp-btn" onclick="sendToWhatsApp()"><svg class="i"><use href="#i-phone"/></svg>إرسال الطلب عبر واتساب</button>
+  </div>
+</div>
+
+<div class="cart-modal" id="notifModal" onclick="if(event.target===this)closeNotifs()">
+  <div class="cart-box">
+    <div class="cart-header"><h3>الإشعارات</h3><button class="close-cart" onclick="closeNotifs()">✕</button></div>
+    <div id="notifList"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
+
+function updateCart() { try { localStorage.setItem('cart', JSON.stringify(cart)); } catch (e) {} updateCartCount(); }
+function updateCartCount() {
+    document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+}
+
+function addToCart(i) {
+    const name = products[i].name, price = products[i].price;
+    const ex = cart.find(i => i.name === name);
+    if (ex) ex.quantity += 1; else cart.push({ name, price, quantity: 1 });
+    updateCart();
+    const btn = event.target.closest('.add-to-cart');
+    const old = btn.innerHTML;
+    btn.innerHTML = icon('check') + 'تمت الإضافة';
+    btn.style.background = '#1b7f4b'; btn.style.color = '#fff'; btn.style.borderColor = '#1b7f4b';
+    setTimeout(() => { btn.innerHTML = old; btn.style.background = btn.style.color = btn.style.borderColor = ''; }, 1300);
+}
+function removeFromCart(index) { cart.splice(index, 1); updateCart(); showCart(); }
+
+function showCart() {
+    const items = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    document.getElementById('dropdownMenu').classList.remove('active');
+    if (!cart.length) {
+        items.innerHTML = '<div class="empty-cart"><p>السلة فارغة</p></div>';
+        totalEl.innerHTML = '';
+    } else {
+        items.innerHTML = cart.map((item, index) => `
+            <div class="cart-item">
+                <div><h4>${Platform.esc(item.name)}</h4><div class="cart-item-price">${item.price} جنيه × ${item.quantity}</div></div>
+                <button class="remove-item" onclick="removeFromCart(${index})">حذف</button>
+            </div>`).join('');
+        totalEl.textContent = 'الإجمالي: ' + cart.reduce((s, i) => s + i.price * i.quantity, 0) + ' جنيه';
+    }
+    document.getElementById('cartModal').classList.add('active');
+    document.querySelector('.overlay').classList.remove('active');
+}
+function closeCart() { document.getElementById('cartModal').classList.remove('active'); }
+
+function sendToWhatsApp() {
+    if (!cart.length) { alert('السلة فارغة!'); return; }
+    const userData = { sName: me ? me.name : '', sPhone: me ? me.phone : '' };
+    let message = '*طلب جديد من المنصة*%0A%0A';
+    message += `*الاسم:* ${encodeURIComponent(userData.sName || 'غير معروف')}%0A`;
+    message += `*رقم الهاتف:* ${userData.sPhone || 'غير معروف'}%0A%0A`;
+    message += '*الطلبات:*%0A';
+    let total = 0;
+    cart.forEach(item => {
+        const t = item.price * item.quantity;
+        message += `• ${encodeURIComponent(item.name)} - ${item.price} جنيه × ${item.quantity} = ${t} جنيه%0A`;
+        total += t;
+    });
+    message += `%0A*الإجمالي: ${total} جنيه*`;
+    const num = Platform.waNumber(settings.supportNumber) || '201505786505';
+    window.open(`https://wa.me/${num}?text=${message}`, '_blank');
+    cart = []; updateCart(); closeCart();
+}
+
+let me = null, settings = {}, courses = [];
+
+const DEFAULT_PRODUCTS = [
+  { name: 'نوته', price: 45, image: 'p-notebook.webp' },
+  { name: 'لخص دروسك', price: 60, image: 'p-summary.webp' },
+  { name: 'سنادة', price: 35, image: 'p-stand.webp' },
+  { name: 'استيكرز', price: 25, image: 'p-stickers.webp' }
+];
+const DEFAULT_IMG = {}; DEFAULT_PRODUCTS.forEach(p => DEFAULT_IMG[p.name] = p.image);
+let products = DEFAULT_PRODUCTS;
+const okImg = u => /^https:\/\//i.test(u || '') ? u : '';
+
+function renderStore() {
+  document.getElementById('productsTrack').innerHTML = products.map((p, i) =>
+    '<div class="product"><div class="im">' + (p.image ? '<img src="' + Platform.esc(p.image) + '" alt="' + Platform.esc(p.name) + '" loading="lazy">' : '') + '</div><div class="pi"><h4>' + Platform.esc(p.name) + '</h4><div class="pr">' + Platform.esc(p.price) + ' جنيه</div><button class="add-to-cart" onclick="addToCart(' + i + ')">' + icon('plus') + 'أضف للسلة</button></div></div>').join('');
+}
+
+function applySite() {
+  const sup = settings.supportNumber || '01505786505';
+  document.getElementById('supportNumber').textContent = sup;
+  document.getElementById('supCall').href = 'tel:' + sup;
+  document.getElementById('supWa').href = 'https://wa.me/' + Platform.waNumber(sup);
+  if (okImg(settings.heroImage)) document.getElementById('heroImg').src = settings.heroImage;
+  if (okImg(settings.contactImage)) document.getElementById('contactImg').src = settings.contactImage;
+  if (Array.isArray(settings.products)) { products = settings.products.map(p => ({ name: p.name, price: p.price, image: okImg(p.image) || (DEFAULT_IMG[p.name] || '') })); renderStore(); }
+}
+
+function goPackages() {
+    closeAll();
+    document.getElementById('packagesSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setUnread(n) {
+    const el = document.getElementById('bellCount');
+    el.textContent = n > 9 ? '9+' : n;
+    el.style.display = n > 0 ? 'flex' : 'none';
+}
+
+function renderPackages() {
+    const grid = document.getElementById('packagesGrid');
+    if (!courses.length) { grid.innerHTML = '<div class="loading-box">لا توجد باقات متاحة لصفك حالياً</div>'; return; }
+    const label = { active: 'ادخل', pending: 'قيد المراجعة', rejected: 'أعد الطلب', none: 'اشترك' };
+    const badge = { active: '<span class="pkg-badge active">مشترك</span>', pending: '<span class="pkg-badge pending">طلبك قيد المراجعة</span>', rejected: '<span class="pkg-badge rejected">تعذر التفعيل — راجع الإشعارات</span>', none: '' };
+    grid.innerHTML = courses.map(c => {
+        const img = c.image || (c.type === 'term' ? 'pkg-term.webp' : 'pkg-month.webp');
+        const cls = c.status === 'active' ? 'ok' : (c.status === 'pending' ? 'wait' : '');
+        return `<article class="ticket" onclick="openPackage('${Platform.esc(c.id)}')">
+            <div class="pic"><img src="${Platform.esc(img)}" alt="${Platform.esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.style.display='none'"></div>
+            <div class="perf"></div>
+            <div class="info">
+                ${badge[c.status] || ''}
+                <h3>${Platform.esc(c.title)}</h3>
+                <p>${Platform.esc(c.description)}</p>
+                <div class="pkg-foot">
+                    <div class="price">${Platform.esc(c.price)} <span>جنيه</span></div>
+                    <button class="package-btn ${cls}">${label[c.status] || 'اشترك'}</button>
+                </div>
+            </div>
+        </article>`;
+    }).join('');
+}
+
+function openPackage(id) {
+    const c = courses.find(x => x.id === id);
+    if (!c) return;
+    window.location.href = (c.status === 'active' ? 'lectures.html?course=' : 'subscribe.html?course=') + encodeURIComponent(id);
+}
+
+async function loadHome() {
+    try {
+        const r = await Platform.call('home');
+        me = r.student; settings = r.settings || {}; courses = r.courses || [];
+        applySite();
+        setUnread(r.unread || 0);
+        renderPackages();
+    } catch (e) {
+        document.getElementById('packagesGrid').innerHTML = '<div class="loading-box">' + Platform.esc(e.message) + '<br><br><button class="package-btn" onclick="location.reload()">إعادة المحاولة</button></div>';
+    }
+}
+
+async function showNotifs() {
+    closeAll();
+    const box = document.getElementById('notifList');
+    box.innerHTML = '<div class="empty-cart"><p>جاري التحميل...</p></div>';
+    document.getElementById('notifModal').classList.add('active');
+    try {
+        const r = await Platform.call('notifications');
+        box.innerHTML = r.items.length ? r.items.map(n => `<div class="notif-item ${n.read ? '' : 'unread'}"><h4>${Platform.esc(n.title)}</h4><p>${Platform.esc(n.message)}</p><small>${Platform.esc(Platform.fmtDate(n.createdAt))}</small></div>`).join('') : '<div class="empty-cart"><p>لا توجد إشعارات</p></div>';
+        if (r.items.some(n => !n.read)) { await Platform.call('markRead'); setUnread(0); }
+    } catch (e) { box.innerHTML = '<div class="empty-cart"><p>' + Platform.esc(e.message) + '</p></div>'; }
+}
+function closeNotifs() { document.getElementById('notifModal').classList.remove('active'); }
+
+function toggleMenu() {
+    document.getElementById('dropdownMenu').classList.toggle('active');
+    document.querySelector('.overlay').classList.toggle('active');
+}
+function closeAll() {
+    document.getElementById('dropdownMenu').classList.remove('active');
+    document.querySelector('.overlay').classList.remove('active');
+}
+function logout() {
+    if (confirm('هل تريد تسجيل الخروج؟')) { Platform.logout(); return; }
+    closeAll();
+}
+
+function preventBackNavigation() {
+    if (window.history && window.history.pushState) {
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function() { window.history.pushState(null, null, window.location.href); };
+    }
+}
+
+window.onload = function() {
+    if (!Platform.getCode()) { window.location.href = 'index.html'; return; }
+    if (typeof DEVELOPER_FB_URL !== 'undefined') document.getElementById('devLink').href = DEVELOPER_FB_URL;
+    updateCartCount();
+    renderStore();
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    preventBackNavigation();
+    loadHome();
+};
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) { if (!Platform.getCode()) window.location.href = 'index.html'; else loadHome(); }
+});
+</script>
+</body>
+</html>

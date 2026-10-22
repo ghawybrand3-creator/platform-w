@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محتوى الكورس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="home.html" class="back-btn"><svg class="i"><use href="#i-arrow"/></svg>رجوع</a>
+  <h1 id="pageTitle">محتوى الكورس</h1>
+</div></header>
+
+<main class="page">
+  <div id="lecturesContainer"><div class="state-box">جاري التحميل...</div></div>
+</main>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">تأكيد</div>
+    <div class="modal-message" id="modalMessage"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn cancel" onclick="closeModal()">إلغاء</button>
+      <button class="modal-btn confirm" onclick="modalConfirm()">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+const courseId = new URLSearchParams(location.search).get('course') || '';
+const KIND = { quiz: ['كويز', 'pen', 'homework', 'btn-homework'], homework: ['واجب', 'file', 'homework', 'btn-homework'], exam: ['امتحان', 'pen', 'exam', 'btn-exam'] };
+let lessons = [], modalCallback = null;
+
+function showModal(title, message, onConfirm) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMessage').innerHTML = message;
+  modalCallback = onConfirm;
+  document.getElementById('confirmModal').classList.add('active');
+}
+function closeModal() { document.getElementById('confirmModal').classList.remove('active'); modalCallback = null; }
+function modalConfirm() { const cb = modalCallback; closeModal(); if (cb) cb(); }
+document.getElementById('confirmModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+
+function quizSection(l, q) {
+  const k = KIND[q.kind] || KIND.quiz;
+  const done = q.status === 'submitted';
+  const score = done && q.percent !== undefined ? ' — ' + q.score + '/' + q.total : '';
+  const label = done ? 'تم التسليم' + score : (q.status === 'started' ? 'كمّل ' + k[0] : 'ابدأ ' + k[0]);
+  const info = (q.timeLimit ? q.timeLimit + ' دقيقة • ' : '') + q.questionsCount + ' سؤال';
+  return `
+    <div class="section" id="section-q-${Platform.esc(q.id)}">
+      <div class="section-header" onclick="this.parentNode.classList.toggle('open')">
+        <div class="section-title"><div class="section-icon ${k[2]}">${icon(k[1])}</div><span>${Platform.esc(q.title)}</span></div>
+        <div class="section-right">
+          ${done ? '<span class="section-status status-done">تم</span>' : '<span class="section-status status-pending">لم يُسلَّم</span>'}
+          <div class="section-toggle">${icon('down')}</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="item-row">
+          <div class="item-title">${k[0]} • ${info}</div>
+          <button class="action-btn ${k[3]} ${done ? 'done' : ''}" ${(!l.unlocked || done || !q.questionsCount) ? 'disabled' : ''} onclick="confirmQuiz('${Platform.esc(q.id)}', '${Platform.esc(l.id)}')">${label}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function render() {
+  const box = document.getElementById('lecturesContainer');
+  if (!lessons.length) { box.innerHTML = '<div class="state-box">لسه مفيش محاضرات في الكورس ده.<br>هتظهر هنا أول ما المدرس يضيفها.</div>'; return; }
+  box.innerHTML = lessons.map((l, i) => {
+    const cls = l.completed ? 'completed' : (!l.unlocked ? 'locked' : 'active');
+    const badge = l.completed ? '<span class="chip ok">مكتملة</span>' : (!l.unlocked ? '<span class="chip gray">مقفلة</span>' : '<span class="chip red">متاحة</span>');
+    return `
+      <div class="lecture-card ${cls}" id="lecture-${Platform.esc(l.id)}">
+        <div class="lecture-header" onclick="toggleLecture('${Platform.esc(l.id)}')">
+          <div class="lecture-number">${l.completed ? icon('check') : (!l.unlocked ? icon('lock') : i + 1)}</div>
+          <div class="lecture-info"><h2>${Platform.esc(l.title)}</h2><p>${Platform.esc(l.topics)}</p></div>
+          <div class="lecture-side">${badge}<span class="toggle-btn">${icon('down')}</span></div>
+        </div>
+        <div class="lecture-content">
+          ${!l.unlocked ? '<div class="warning-msg">لازم تخلّص الواجب والامتحانات بتاعة المحاضرة اللي قبلها</div>' : ''}
+          <div class="section open">
+            <div class="section-header" onclick="this.parentNode.classList.toggle('open')">
+              <div class="section-title"><div class="section-icon">${icon('play')}</div><span>جزء الشرح</span></div>
+              <div class="section-right">${l.watched ? '<span class="section-status status-done">شاهدت</span>' : ''}<div class="section-toggle">${icon('down')}</div></div>
+            </div>
+            <div class="section-body">
+              <div class="item-row">
+                <div class="item-title">${Platform.esc(l.title)}</div>
+                <button class="action-btn btn-video" ${(!l.unlocked || !l.hasVideo) ? 'disabled' : ''} onclick="location.href='lesson.html?id=${encodeURIComponent(l.id)}'">${l.hasVideo ? 'مشاهدة المحاضرة' : 'الفيديو لسه مش مرفوع'}</button>
+              </div>
+            </div>
+          </div>
+          ${l.quizzes.map(q => quizSection(l, q)).join('')}
+        </div>
+      </div>`;
+  }).join('');
+  const first = lessons.find(l => l.unlocked && !l.completed) || lessons[lessons.length - 1];
+  if (first) document.getElementById('lecture-' + first.id).classList.add('open');
+}
+
+function toggleLecture(id) {
+  const l = lessons.find(x => x.id === id);
+  if (!l.unlocked) { alert('لازم تخلّص الواجب والامتحانات بتاعة المحاضرة اللي قبلها الأول'); return; }
+  document.getElementById('lecture-' + id).classList.toggle('open');
+}
+
+function confirmQuiz(quizId, lessonId) {
+  const l = lessons.find(x => x.id === lessonId); const q = l.quizzes.find(x => x.id === quizId);
+  const k = KIND[q.kind] || KIND.quiz;
+  const timeMsg = q.timeLimit && q.status !== 'started' ? `<br>مدة ${k[0]}: <b>${q.timeLimit} دقيقة</b> والعداد بيبدأ أول ما تدخل ومبيقفش.` : '';
+  showModal('تأكيد البدء', `هل أنت متأكد إنك عايز تبدأ <strong>${Platform.esc(q.title)}</strong>؟ تقدر تسلّمه مرة واحدة بس.${timeMsg}`, () => { location.href = 'quiz.html?id=' + encodeURIComponent(quizId); });
+}
+
+async function init() {
+  if (!Platform.getCode()) { location.href = 'index.html'; return; }
+  try {
+    const r = await Platform.call('course', { courseId: courseId });
+    document.getElementById('pageTitle').textContent = r.course.title;
+    lessons = r.lessons; render();
+  } catch (e) {
+    if (e.code === 'NO_SUB') { location.replace('subscribe.html?course=' + encodeURIComponent(courseId)); return; }
+    document.getElementById('lecturesContainer').innerHTML = '<div class="state-box">' + Platform.esc(e.message) + '<br><br><a class="btn ink" href="home.html">الرئيسية</a></div>';
+  }
+}
+window.addEventListener('pageshow', e => { if (e.persisted) init(); });
+init();
+</script>
+</body>
+</html>

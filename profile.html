@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الملف الشخصي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+/* بطاقة الطالب */
+.idcard{background:var(--ink);color:#fff;border-radius:14px;overflow:hidden;position:relative;margin-bottom:16px}
+.idcard::before{content:"";display:block;height:8px;background:repeating-linear-gradient(135deg,var(--red) 0 14px,#fff 14px 20px,var(--ink) 20px 34px)}
+.idcard-in{display:flex;gap:16px;align-items:center;padding:18px 18px 20px}
+.avatar{width:72px;height:72px;border-radius:12px;background:var(--gold);color:var(--ink);font-family:var(--display);font-size:2.4rem;display:flex;align-items:center;justify-content:center;flex:none;line-height:1}
+.idtxt{min-width:0;flex:1}
+.student-name{font-family:var(--display);font-size:1.7rem;line-height:1.3;overflow-wrap:anywhere}
+.grade-line{color:#b9c3d6;font-weight:600;font-size:.92rem}
+.codetag{display:inline-block;margin-top:8px;direction:ltr;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1.5px;font-size:1.02rem;border:1.5px dashed rgba(255,255,255,.5);border-radius:6px;padding:2px 12px;user-select:all}
+.idfoot{display:flex;border-top:1px solid rgba(255,255,255,.14)}
+.idfoot div{flex:1;text-align:center;padding:11px 6px}
+.idfoot div+div{border-right:1px solid rgba(255,255,255,.14)}
+.idfoot b{display:block;font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.2;color:var(--gold)}
+.idfoot span{font-size:.78rem;color:#b9c3d6;font-weight:600}
+
+.block{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.block h3{font-family:var(--display);font-weight:400;font-size:1.2rem;padding:12px 16px;border-bottom:1px solid var(--line2)}
+.rows{background-image:var(--ruled);background-position:0 8px}
+.row{display:flex;gap:12px;justify-content:space-between;align-items:baseline;padding:0 16px;min-height:48px;line-height:48px;border-bottom:1px solid var(--line2)}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--mute);font-weight:600;font-size:.88rem;flex:none}
+.row .v{font-weight:700;text-align:left;overflow-wrap:anywhere;line-height:1.5;padding:9px 0}
+.row .v.num{direction:ltr}
+.sub{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line2)}
+.sub:last-child{border-bottom:0}
+.sub .dot{width:34px;height:34px;border-radius:8px;background:var(--ok-soft);color:var(--ok);display:flex;align-items:center;justify-content:center;flex:none}
+.sub .t{font-weight:700;flex:1}
+.sub small{display:block;color:var(--mute);font-weight:600;font-size:.8rem}
+.empty{padding:20px 16px;color:var(--mute);text-align:center}
+.empty a{color:var(--red);font-weight:700}
+.acts{display:flex;gap:10px}
+.acts .btn{flex:1}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="home.html" class="back-btn"><svg class="i"><use href="#i-arrow"/></svg>رجوع</a>
+  <h1>الملف الشخصي</h1>
+</div></header>
+
+<main class="page">
+  <section class="idcard">
+    <div class="idcard-in">
+      <div class="avatar" id="avatar">؟</div>
+      <div class="idtxt">
+        <div class="student-name" id="studentName">جاري التحميل...</div>
+        <div class="grade-line" id="gradeLine"></div>
+        <span class="codetag" id="studentCode">---</span>
+      </div>
+    </div>
+    <div class="idfoot">
+      <div><b id="watched">0</b><span>محاضرة شاهدتها</span></div>
+      <div><b id="examsTaken">0</b><span>امتحان محلول</span></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>بياناتي</h3>
+    <div class="rows">
+      <div class="row"><span class="k">اسم ولي الأمر</span><span class="v" id="fName">---</span></div>
+      <div class="row"><span class="k">الصف الدراسي</span><span class="v" id="grade">---</span></div>
+      <div class="row"><span class="k">رقم الطالب</span><span class="v num" id="sPhone">---</span></div>
+      <div class="row"><span class="k">رقم ولي الأمر</span><span class="v num" id="fPhone">---</span></div>
+      <div class="row"><span class="k">العنوان</span><span class="v" id="address">---</span></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>اشتراكاتي</h3>
+    <div id="subs"><div class="empty">جاري التحقق...</div></div>
+  </section>
+
+  <div class="acts">
+    <a class="btn ink" href="home.html">الصفحة الرئيسية</a>
+    <button class="btn line" onclick="if(confirm('هل تريد تسجيل الخروج؟'))Platform.logout()">تسجيل الخروج</button>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!Platform.getCode()) { window.location.href = 'index.html'; return; }
+  let r;
+  try { r = await Platform.call('me'); }
+  catch (e) { $('studentName').textContent = e.message; return; }
+
+  const u = r.student;
+  $('studentName').textContent = u.name;
+  $('avatar').textContent = (u.name || '؟').trim().charAt(0);
+  $('studentCode').textContent = u.code;
+  $('gradeLine').textContent = 'الصف ' + Platform.gradeName(u.grade);
+  $('fName').textContent = u.fatherName;
+  $('sPhone').textContent = u.phone;
+  $('fPhone').textContent = u.fatherPhone;
+  $('address').textContent = u.address;
+  $('grade').textContent = Platform.gradeName(u.grade);
+  $('watched').textContent = r.stats.watchedLessons;
+  $('examsTaken').textContent = r.stats.quizzesDone;
+
+  const box = $('subs');
+  if (r.subscriptions.length) {
+    box.innerHTML = r.subscriptions.map(s => {
+      let end = 'اشتراك مفتوح';
+      if (s.endDate) { const d = new Date(s.endDate); if (!isNaN(d)) end = 'ينتهي ' + d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }); }
+      return '<div class="sub"><span class="dot">' + icon('check') + '</span><div class="t">' + Platform.esc(s.title) + '<small>' + Platform.esc(end) + '</small></div><a class="chip ok" style="text-decoration:none" href="lectures.html?course=' + encodeURIComponent(s.courseId) + '">ادخل</a></div>';
+    }).join('');
+  } else {
+    box.innerHTML = '<div class="empty">لسه مفيش اشتراك. <a href="home.html">اختار باقتك من الرئيسية</a></div>';
+  }
+});
+</script>
+</body>
+</html>

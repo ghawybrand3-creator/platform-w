@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المحاضرة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>.link-box a{color:#fff;font-weight:800;border:1.5px solid #fff;border-radius:8px;padding:10px 20px;text-decoration:none}.item-row+.item-row{margin-top:0}</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="#" class="back-btn" id="backBtn"><svg class="i"><use href="#i-arrow"/></svg>رجوع</a>
+  <h1 id="courseName"></h1>
+</div></header>
+
+<main class="page">
+  <div id="content"><div class="state-box">جاري التحميل...</div></div>
+</main>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+const lessonId = new URLSearchParams(location.search).get('id') || '';
+const KIND = { quiz: ['كويز', 'btn-homework'], homework: ['واجب', 'btn-homework'], exam: ['امتحان', 'btn-exam'] };
+
+function player(url) {
+  const v = Platform.videoInfo(url);
+  if (!v) return '<div class="video-frame"><div class="link-box">الفيديو لسه مش مرفوع</div></div>';
+  if (v.type === 'iframe') return `<div class="video-frame"><iframe src="${Platform.esc(v.src)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+  if (v.type === 'video') return `<div class="video-frame"><video src="${Platform.esc(v.src)}" controls playsinline controlslist="nodownload"></video></div>`;
+  return `<div class="video-frame"><div class="link-box"><a href="${Platform.esc(v.src)}" target="_blank" rel="noopener">افتح الفيديو</a></div></div>`;
+}
+
+function quizRow(q) {
+  const k = KIND[q.kind] || KIND.quiz;
+  const done = q.status === 'submitted';
+  const score = done && q.percent !== undefined ? ' — ' + q.score + '/' + q.total : '';
+  const label = done ? 'تم التسليم' + score : (q.status === 'started' ? 'كمّل ' + k[0] : 'ابدأ ' + k[0]);
+  return `<div class="item-row">
+    <div class="item-title">${Platform.esc(q.title)} <small style="color:var(--mute)">(${k[0]}${q.timeLimit ? ' • ' + q.timeLimit + ' دقيقة' : ''} • ${q.questionsCount} سؤال)</small></div>
+    <button class="action-btn ${k[1]} ${done ? 'done' : ''}" ${(done || !q.questionsCount) ? 'disabled' : ''} onclick="location.href='quiz.html?id=${encodeURIComponent(q.id)}'">${label}</button>
+  </div>`;
+}
+
+async function init() {
+  if (!Platform.getCode()) { location.href = 'index.html'; return; }
+  try {
+    const r = await Platform.call('lesson', { lessonId: lessonId });
+    document.getElementById('backBtn').href = 'lectures.html?course=' + encodeURIComponent(r.course.id);
+    document.getElementById('courseName').textContent = r.course.title;
+    document.title = r.lesson.title + ' - منصة الأستاذ وائل الشيخ';
+    document.getElementById('content').innerHTML =
+      player(r.lesson.videoUrl) +
+      `<h2 class="lesson-title">${Platform.esc(r.lesson.title)}</h2><div class="lesson-topics">${Platform.esc(r.lesson.topics)}</div>` +
+      (r.quizzes.length ? `<section class="panel"><h3>الواجب والامتحانات</h3>${r.quizzes.map(quizRow).join('')}</section>` : '');
+  } catch (e) {
+    document.getElementById('backBtn').href = 'home.html';
+    document.getElementById('content').innerHTML = '<div class="state-box">' + Platform.esc(e.message) + '</div>';
+  }
+}
+window.addEventListener('pageshow', e => { if (e.persisted) init(); });
+init();
+</script>
+</body>
+</html>

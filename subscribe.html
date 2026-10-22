@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الاشتراك في الباقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+.banner{height:150px;background:var(--ink) url(subscribe.webp) center/cover;border-radius:12px;margin-bottom:16px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.head h2{font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1.3}
+.price-pill{background:var(--ink);color:#fff;padding:3px 14px;border-radius:6px;font-weight:700;font-size:.9rem}
+.price-pill:empty{display:none}
+.cash{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-right:5px solid var(--red)}
+.cash .lb{font-weight:700;color:var(--mute);font-size:.88rem;width:100%}
+.cash .num{font-family:'Courier New',monospace;font-weight:800;font-size:1.6rem;letter-spacing:1.5px;direction:ltr;flex:1;min-width:150px;text-align:right}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);background:#fff;border-radius:8px;padding:7px 14px;font-weight:700;font-size:.88rem}
+.copy-btn:hover{background:var(--ink);color:#fff}
+.steps{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:6px 16px;margin-bottom:14px}
+.steps h3{font-family:var(--display);font-weight:400;font-size:1.2rem;padding:8px 0 4px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px dashed var(--line)}
+.step:first-of-type{border-top:0}
+.step .n{width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.step .t{font-size:.93rem;color:var(--ink2);line-height:1.7}
+.formcard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+@media(min-width:700px){.banner{height:190px}}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back-btn" href="home.html"><svg class="i"><use href="#i-arrow"/></svg>رجوع</a>
+  <h1>الاشتراك في الباقة</h1>
+</div></header>
+
+<main class="page">
+  <div class="banner"></div>
+  <div class="head"><h2 id="courseTitle">الاشتراك في الباقة</h2><span class="price-pill" id="coursePrice"></span></div>
+
+  <div id="stateBox"></div>
+
+  <div id="formBox" class="hide">
+    <div class="cash">
+      <div class="lb">حوّل على فودافون كاش</div>
+      <div class="num" id="vodafoneNum">---</div>
+      <button class="copy-btn" onclick="copyNumber()">نسخ الرقم</button>
+    </div>
+
+    <div class="steps">
+      <h3>خطوات الاشتراك</h3>
+      <div class="step"><span class="n">1</span><span class="t">حوّل مبلغ الاشتراك على الرقم أعلاه.</span></div>
+      <div class="step"><span class="n">2</span><span class="t">اكتب الرقم اللي حوّلت منه ورقم العملية (لو ظهرلك).</span></div>
+      <div class="step"><span class="n">3</span><span class="t">اضغط «إرسال طلب التفعيل».</span></div>
+      <div class="step"><span class="n">4</span><span class="t">بعد مراجعة التحويل هيتفعل اشتراكك وهيوصلك إشعار.</span></div>
+    </div>
+
+    <div class="formcard">
+      <div class="field"><label>الرقم اللي حوّلت منه</label><input type="tel" class="ltr" id="senderPhone" placeholder="01XXXXXXXXX" maxlength="11" autocomplete="off"></div>
+      <div class="field"><label>رقم العملية (اختياري)</label><input type="text" id="refNo" placeholder="رقم العملية من رسالة فودافون كاش" maxlength="60" autocomplete="off"><small>بيساعدنا نراجع التحويل أسرع</small></div>
+      <button class="btn block" id="sendBtn" onclick="sendRequest()">إرسال طلب التفعيل</button>
+    </div>
+  </div>
+  <div id="subMsg" class="msg-box"></div>
+</main>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+const courseId = new URLSearchParams(location.search).get('course') || '';
+let settings = {}, course = null;
+
+function showMsg(text, type) {
+  const m = document.getElementById('subMsg');
+  m.className = 'msg-box ' + type; m.textContent = text;
+}
+
+function copyNumber() {
+  const num = document.getElementById('vodafoneNum').textContent;
+  const btn = document.querySelector('.copy-btn');
+  const done = () => { btn.textContent = 'تم النسخ'; setTimeout(() => { btn.textContent = 'نسخ الرقم'; }, 2000); };
+  if (navigator.clipboard) navigator.clipboard.writeText(num).then(done).catch(() => {});
+}
+
+async function init() {
+  if (!Platform.getCode()) { location.href = 'index.html'; return; }
+  try {
+    const r = await Platform.call('home');
+    settings = r.settings || {};
+    course = (r.courses || []).find(c => c.id === courseId);
+    if (!course) { document.getElementById('stateBox').innerHTML = '<div class="status-card rejected">الباقة دي مش متاحة. ارجع للرئيسية واختار باقة.</div>'; return; }
+    document.getElementById('courseTitle').textContent = course.title;
+    document.getElementById('coursePrice').textContent = 'المبلغ المطلوب: ' + course.price + ' جنيه';
+    document.getElementById('vodafoneNum').textContent = settings.vodafoneNumber || '---';
+    if (course.status === 'active') { location.replace('lectures.html?course=' + encodeURIComponent(course.id)); return; }
+    if (course.status === 'pending') {
+      document.getElementById('stateBox').innerHTML = '<div class="status-card pending">طلبك قيد المراجعة<br><small>هيتفعل اشتراكك بمجرد التأكد من التحويل، وهيوصلك إشعار. لو اتأخر كلّمنا على ' + Platform.esc(settings.supportNumber || '') + '</small></div>';
+      return;
+    }
+    if (course.status === 'rejected') {
+      document.getElementById('stateBox').innerHTML = '<div class="status-card rejected">تعذر تفعيل طلبك السابق. راجع الإشعارات في الصفحة الرئيسية، ولو حوّلت فعلاً ابعت الطلب تاني بالبيانات الصحيحة.</div>';
+    }
+    document.getElementById('formBox').classList.remove('hide');
+  } catch (e) { showMsg(e.message, 'error'); }
+}
+
+async function sendRequest() {
+  const phone = document.getElementById('senderPhone').value.replace(/\s+/g, '');
+  if (!/^01[0125][0-9]{8}$/.test(phone)) { showMsg('اكتب الرقم اللي حوّلت منه (11 رقم يبدأ بـ 01)', 'error'); return; }
+  await Platform.busy(document.getElementById('sendBtn'), async () => {
+    try {
+      const r = await Platform.call('requestSub', { courseId: courseId, senderPhone: phone, ref: document.getElementById('refNo').value.trim() });
+      document.getElementById('formBox').classList.add('hide');
+      document.getElementById('stateBox').innerHTML = '<div class="status-card pending">' + Platform.esc(r.message) + '</div>';
+      document.getElementById('subMsg').className = 'msg-box';
+    } catch (e) { showMsg(e.message, 'error'); }
+  });
+}
+
+init();
+</script>
+</body>
+</html>

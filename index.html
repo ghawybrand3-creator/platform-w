@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة الأستاذ وائل الشيخ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+body{background:var(--paper)}
+.shell{display:grid;grid-template-columns:1fr;min-height:100vh}
+.cover{position:relative;background:var(--ink);color:#fff;overflow:hidden}
+.cover img{display:block;width:100%;aspect-ratio:1/1;max-height:66vh;object-fit:cover;object-position:50% 6%}
+.cover::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(to top,rgba(16,26,46,.92),rgba(16,26,46,0))}
+.cover-txt{position:absolute;z-index:1;inset:auto 0 0 0;padding:20px 22px 22px}
+.cover-txt .t{font-family:var(--display);font-size:2.1rem;line-height:1.25}
+.cover-txt .s{display:inline-block;margin-top:6px;font-weight:700;font-size:.95rem;color:var(--ink);background:var(--gold);padding:1px 12px;border-radius:4px}
+.formside{padding:22px 20px 36px;max-width:520px;width:100%;margin:0 auto}
+.formside h2{font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1.3}
+.formside .lead{color:var(--mute);font-size:.92rem;margin:2px 0 16px}
+.tabs{display:flex;border-bottom:2px solid var(--line);margin-bottom:18px}
+.tab{flex:1;background:none;border:0;padding:10px 4px;font-weight:700;font-size:1rem;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.form-section{display:none}.form-section.active{display:block}
+.two{display:grid;grid-template-columns:1fr;gap:0 12px}
+.hint{display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:12px 14px;background:#f6f7f9;border-radius:8px;color:var(--ink2);font-size:.88rem;line-height:1.8}
+.hint svg{margin-top:5px;color:var(--mute)}
+/* مودال الكود */
+.code-modal-overlay{position:fixed;inset:0;background:rgba(16,26,46,.6);display:none;align-items:center;justify-content:center;z-index:99;padding:18px}
+.code-modal-overlay.active{display:flex}
+.code-modal-box{background:#fff;border-radius:14px;max-width:380px;width:100%;overflow:hidden;text-align:center}
+.code-modal-box .top{background:var(--ink);color:#fff;padding:16px}
+.code-modal-box .top h3{font-family:var(--display);font-weight:400;font-size:1.45rem}
+.code-modal-box .body{padding:20px 20px 22px}
+.code-label{font-weight:700;color:var(--ink2);margin-bottom:8px}
+.final-code-display{direction:ltr;font-family:'Courier New',monospace;font-size:1.7rem;font-weight:800;letter-spacing:2px;padding:12px;border:2px dashed var(--red);border-radius:8px;color:var(--red-d);background:var(--red-soft);user-select:all}
+.code-note{color:var(--mute);font-size:.88rem;margin:12px 0}
+.screenshot-warning{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:9px;font-weight:700;font-size:.9rem}
+@media(min-width:900px){
+ .shell{grid-template-columns:1.05fr 1fr}
+ .cover{position:sticky;top:0;height:100vh}
+ .cover img{height:100%;aspect-ratio:auto;max-height:none;object-position:50% 8%}
+ .cover-txt{padding:40px 44px}.cover-txt .t{font-size:3rem}
+ .formside{padding:48px 36px;align-self:center}
+ .two{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="cover">
+    <img id="coverImg" src="hero.webp" alt="مستر وائل الشيخ">
+    <div class="cover-txt">
+      <div class="t">منصة الأستاذ وائل الشيخ</div>
+      <span class="s">معلم أول English</span>
+    </div>
+  </header>
+
+  <main class="formside">
+    <h2>أهلاً بيك يا هندسة</h2>
+    <p class="lead">سجّل بياناتك بدقة عشان حسابك يتحفظ.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" onclick="showTab('register')">حساب جديد</button>
+      <button class="tab" onclick="showTab('login')">تسجيل دخول</button>
+    </div>
+
+    <div id="register" class="form-section active">
+      <div class="two">
+        <div class="field input-group"><label>اسمك</label><input type="text" id="sName" placeholder="اكتب اسمك هنا" autocomplete="off"></div>
+        <div class="field input-group"><label>اسم والدك</label><input type="text" id="fName" placeholder="اكتب اسم والدك هنا" autocomplete="off"></div>
+        <div class="field input-group"><label>رقمك</label><input type="tel" id="sPhone" class="ltr" placeholder="01XXXXXXXXX" maxlength="11"></div>
+        <div class="field input-group"><label>رقم والدك</label><input type="tel" id="fPhone" class="ltr" placeholder="01XXXXXXXXX" maxlength="11"></div>
+      </div>
+      <div class="field input-group"><label>عنوانك</label><input type="text" id="address" placeholder="المحافظة - المدينة - الشارع"></div>
+      <div class="field input-group"><label>الصف الدراسي</label>
+        <select id="grade">
+          <option value="">اختر الصف...</option>
+          <option value="1">الصف الأول الثانوي</option>
+          <option value="2">الصف الثاني الثانوي</option>
+          <option value="3">الصف الثالث الثانوي</option>
+        </select>
+      </div>
+      <button class="btn block" onclick="register()">إنشاء الحساب ودخول المنصة</button>
+      <div id="regMsg" class="message"></div>
+    </div>
+
+    <div id="login" class="form-section">
+      <div class="field input-group"><label>كود الطالب</label>
+        <input type="text" id="loginCode" class="ltr" placeholder="AHMD-123456" style="text-transform:uppercase;letter-spacing:2px;font-weight:700" autocomplete="off">
+      </div>
+      <button class="btn block" onclick="login()">دخول للمنصة</button>
+      <div id="loginMsg" class="message"></div>
+      <div class="hint"><svg class="i"><use href="#i-lock"/></svg><span>نسيت الكود؟ كلّم إدارة المنصة وهنرجّعهولك.</span></div>
+    </div>
+  </main>
+</div>
+
+<div class="code-modal-overlay" id="codeModal">
+  <div class="code-modal-box">
+    <div class="top"><h3>تم إنشاء حسابك</h3></div>
+    <div class="body">
+      <p class="code-label">ده الكود بتاعك:</p>
+      <div class="final-code-display" id="generatedCodeDisplay">---</div>
+      <p class="code-note">ده كود دخولك للمنصة، سجّل بيه في المرة الجاية على طول.</p>
+      <div class="screenshot-warning">خد Screenshot للكود خلال <span id="timerNum">7</span> ثواني فقط!</div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', async function() {
+    let msg = null;
+    try { msg = sessionStorage.getItem('authMsg'); sessionStorage.removeItem('authMsg'); } catch (e) {}
+    if (msg) showMessage('loginMsg', msg, 'error'), showTab('login', true);
+    Platform.raw('site').then(function (r) { if (/^https:\/\//i.test(r.loginImage || '')) document.getElementById('coverImg').src = r.loginImage; }).catch(function () {});
+    const code = Platform.getCode();
+    if (!code) return;
+    try {
+        await Platform.raw('login', { code: code });
+        window.location.href = 'home.html';
+    } catch (e) {
+        if (e.code === 'AUTH' || e.code === 'SUSPENDED') { Platform.clear(); if (e.code === 'SUSPENDED') { showTab('login', true); showMessage('loginMsg', e.message, 'error'); } }
+    }
+});
+
+let countdownInterval;
+
+function showTab(tab, silent) {
+    document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    document.querySelectorAll('.tab')[tab === 'register' ? 0 : 1].classList.add('active');
+    if (!silent) document.querySelectorAll('.message').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.input-group input, .input-group select').forEach(input => input.classList.remove('error'));
+}
+
+function validateInputs(sName, fName, sPhone, fPhone, address, grade) {
+    const arabicRegex = /^[؀-ۿ\s]+$/;
+    const phoneRegex = /^01[0125][0-9]{8}$/;
+    if (!arabicRegex.test(sName) || sName.trim().length < 3) return "اسم الطالب يجب أن يكون 3 حروف عربية على الأقل.";
+    if (!arabicRegex.test(fName) || fName.trim().length < 3) return "اسم ولي الأمر يجب أن يكون 3 حروف عربية على الأقل.";
+    if (!phoneRegex.test(sPhone.replace(/\s+/g, ''))) return "رقم هاتف الطالب غير صحيح (يجب أن يبدأ بـ 01 ويتكون من 11 رقم).";
+    if (!phoneRegex.test(fPhone.replace(/\s+/g, ''))) return "رقم هاتف ولي الأمر غير صحيح (يجب أن يبدأ بـ 01 ويتكون من 11 رقم).";
+    if (address.trim().length < 5) return "يرجى كتابة العنوان بالتفصيل (المحافظة - المدينة).";
+    if (!grade) return "يرجى اختيار الصف الدراسي من القائمة.";
+    return null;
+}
+
+async function register() {
+    const btn = event.target;
+    const sName = document.getElementById('sName').value.trim();
+    const fName = document.getElementById('fName').value.trim();
+    const sPhone = document.getElementById('sPhone').value.trim();
+    const fPhone = document.getElementById('fPhone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const grade = document.getElementById('grade').value;
+
+    const error = validateInputs(sName, fName, sPhone, fPhone, address, grade);
+    if (error) { showMessage('regMsg', error, 'error'); return; }
+
+    await Platform.busy(btn, async function() {
+        try {
+            const r = await Platform.raw('register', { sName, fName, sPhone, fPhone, address, grade });
+            Platform.setCode(r.code);
+            showCodeModal(r.code);
+            ['sName','fName','sPhone','fPhone','address','grade'].forEach(id => document.getElementById(id).value = '');
+        } catch (e) { showMessage('regMsg', e.message, 'error'); }
+    });
+}
+
+function showCodeModal(code) {
+    const modal = document.getElementById('codeModal');
+    const timerNum = document.getElementById('timerNum');
+    document.getElementById('generatedCodeDisplay').textContent = code;
+    modal.classList.add('active');
+    let seconds = 7;
+    timerNum.textContent = seconds;
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+        seconds--;
+        timerNum.textContent = seconds;
+        if (seconds <= 0) { clearInterval(countdownInterval); window.location.href = 'home.html'; }
+    }, 1000);
+}
+
+async function login() {
+    const btn = event.target;
+    const code = document.getElementById('loginCode').value.trim().toUpperCase();
+    const msg = document.getElementById('loginMsg');
+    if (!code) { showMessage('loginMsg', 'يرجى إدخال كود الطالب أولاً', 'error'); return; }
+    await Platform.busy(btn, async function() {
+        try {
+            await Platform.raw('login', { code: code });
+            Platform.setCode(code);
+            msg.className = 'message success';
+            msg.innerHTML = '<strong>تم تسجيل الدخول بنجاح</strong><br>جاري تحويلك للصفحة الرئيسية...';
+            msg.style.display = 'block';
+            setTimeout(() => { window.location.href = 'home.html'; }, 900);
+        } catch (e) {
+            showMessage('loginMsg', e.code === 'AUTH' ? 'الكود غير صحيح، تأكد من كتابته بدقة أو تواصل مع الدعم' : e.message, 'error');
+        }
+    });
+}
+
+function showMessage(id, text, type) {
+    const el = document.getElementById(id);
+    el.className = 'message ' + type;
+    el.textContent = text;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+</script>
+</body>
+</html>

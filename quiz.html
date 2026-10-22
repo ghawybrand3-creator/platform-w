@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+.qno{position:absolute;top:10px;right:10px;font-family:var(--display);font-size:1.1rem;color:var(--red);width:38px;text-align:center;line-height:1}
+.question-image{min-height:96px}
+.q-text{padding-top:16px;white-space:pre-wrap}
+.done-note{font-weight:700;color:var(--ink2)}
+.done-note b{color:var(--red);font-size:1.15rem}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="#" class="back-btn" id="backBtn"><svg class="i"><use href="#i-arrow"/></svg>رجوع</a>
+  <h1 id="quizBadge">...</h1>
+</div></header>
+
+<main class="page" id="quizContainer">
+  <div id="stateBox" class="state-box">جاري التحميل...</div>
+
+  <div id="quizBox" class="hide">
+    <div class="quiz-bar-meta">
+      <div class="progress-info">السؤال <span id="currentQ">1</span> من <span id="totalQ">0</span></div>
+      <div class="timer hide" id="timer"><svg class="i"><use href="#i-clock"/></svg><span id="timerDisplay">0:00</span></div>
+    </div>
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+
+    <div class="question-card">
+      <div class="question-image" id="questionImage"></div>
+      <div class="options-list" id="optionsList"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn prev" id="prevBtn" onclick="prevQuestion()" disabled>السابق</button>
+      <button class="nav-btn next" id="nextBtn" onclick="nextQuestion()">التالي</button>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="confirmSubmit()">تسليم</button>
+  </div>
+</main>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title">تأكيد التسليم</div>
+    <div class="modal-message" id="confirmMessage"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn cancel" onclick="closeModal('confirmModal')">إلغاء</button>
+      <button class="modal-btn confirm" id="confirmBtn" onclick="submitQuiz()">تأكيد التسليم</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="timeupModal">
+  <div class="modal-box">
+    <div class="modal-title">انتهى الوقت</div>
+    <div class="modal-message"><strong>سيتم تسليم إجاباتك تلقائياً.</strong></div>
+    <div class="modal-buttons"><button class="modal-btn confirm" onclick="submitQuiz(true)">حسناً</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resultModal">
+  <div class="modal-box">
+    <div class="modal-title" id="resultTitle">تم التسليم</div>
+    <div class="modal-message" id="resultMsg"></div>
+    <div class="modal-buttons"><button class="modal-btn confirm" onclick="goBack()">رجوع للمحاضرة</button></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script src="api.js"></script>
+<script>
+const quizId = new URLSearchParams(location.search).get('id') || '';
+const KIND_NAME = { quiz: 'الكويز', homework: 'الواجب', exam: 'الامتحان' };
+let data = null, questions = [], answers = {}, current = 0, timeLeft = 0, timerInterval = null, finished = false, submitting = false;
+let backUrl = 'home.html';
+const $ = id => document.getElementById(id);
+
+function goBack() { location.href = backUrl; }
+function closeModal(id) { $(id).classList.remove('active'); }
+
+function showState(html) { $('stateBox').style.display = 'block'; $('stateBox').innerHTML = html; $('quizBox').classList.add('hide'); }
+
+function showResult(result, auto) {
+  finished = true; clearInterval(timerInterval);
+  closeModal('timeupModal'); closeModal('confirmModal');
+  $('resultTitle').textContent = auto ? 'انتهى الوقت وتم التسليم' : 'تم التسليم بنجاح';
+  $('resultMsg').innerHTML = result ? 'درجتك:<span class="result-score">' + result.score + ' من ' + result.total + '</span>(' + result.percent + '%)' : 'تم استلام إجاباتك. هيشوفها المدرس.';
+  $('resultModal').classList.add('active');
+}
+
+async function init() {
+  if (!Platform.getCode()) { location.href = 'index.html'; return; }
+  try {
+    data = await Platform.call('quiz', { quizId: quizId });
+    backUrl = 'lesson.html?id=' + encodeURIComponent(data.lessonId);
+    $('backBtn').href = backUrl;
+    $('quizBadge').textContent = data.quiz.title;
+    document.title = data.quiz.title + ' - منصة الأستاذ وائل الشيخ';
+    if (data.submitted) {
+      const r = data.result;
+      showState('<div class="done-note">' + Platform.esc(KIND_NAME[data.quiz.kind] || 'الامتحان') + ' اتسلّم قبل كده.' + (r ? '<br>درجتك: <b>' + r.score + ' من ' + r.total + ' (' + r.percent + '%)</b>' : '') + '</div><br><a class="btn ink" href="' + backUrl + '">رجوع للمحاضرة</a>');
+      return;
+    }
+    questions = data.questions;
+    $('stateBox').style.display = 'none';
+    $('quizBox').classList.remove('hide');
+    $('totalQ').textContent = questions.length;
+    $('submitBtn').textContent = 'تسليم ' + (KIND_NAME[data.quiz.kind] || 'الامتحان');
+    if (data.quiz.timeLimit > 0) {
+      const used = (Date.parse(data.serverNow) - Date.parse(data.startedAt)) / 1000;
+      timeLeft = Math.max(0, Math.round(data.quiz.timeLimit * 60 - used));
+      $('timer').classList.remove('hide');
+      startTimer();
+    }
+    renderQuestion();
+  } catch (e) {
+    showState(Platform.esc(e.message) + '<br><br><a class="btn ink" href="' + backUrl + '">رجوع</a>');
+    if (e.code === 'NO_SUB' || e.code === 'LOCKED' || e.code === 'NOT_FOUND') $('backBtn').href = 'home.html';
+  }
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  const img = q.imageUrl ? '<img class="q-img" alt="" src="' + Platform.esc(q.imageUrl) + '">' : '';
+  $('questionImage').innerHTML = '<span class="qno">' + (current + 1) + '</span>' +
+    (img ? '<div style="padding-top:14px">' + img + '</div>' : '') +
+    '<div class="q-text" dir="auto">' + Platform.esc(q.text) + '</div>';
+  const letters = ['أ', 'ب', 'ج', 'د', 'هـ', 'و'];
+  $('optionsList').innerHTML = q.options.map((opt, i) =>
+    '<div class="option-item ' + (answers[q.id] === i ? 'selected' : '') + '" onclick="selectOption(' + i + ')"><div class="option-letter">' + letters[i] + '</div><div class="option-text" dir="auto">' + Platform.esc(opt) + '</div></div>').join('');
+  $('currentQ').textContent = current + 1;
+  $('progressFill').style.width = ((current + 1) / questions.length * 100) + '%';
+  $('prevBtn').disabled = current === 0;
+  $('nextBtn').textContent = current === questions.length - 1 ? 'الأخير' : 'التالي';
+  $('nextBtn').disabled = current === questions.length - 1;
+}
+function selectOption(i) { if (finished) return; answers[questions[current].id] = i; renderQuestion(); }
+function nextQuestion() { if (current < questions.length - 1) { current++; renderQuestion(); } }
+function prevQuestion() { if (current > 0) { current--; renderQuestion(); } }
+
+function fmt() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; $('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0'); }
+function startTimer() {
+  fmt();
+  if (timeLeft <= 0) { timeUp(); return; }
+  timerInterval = setInterval(() => {
+    timeLeft--; fmt();
+    if (timeLeft <= 10) $('timer').classList.add('danger');
+    if (timeLeft <= 0) { clearInterval(timerInterval); timeUp(); }
+  }, 1000);
+}
+function timeUp() { if (finished) return; $('timeupModal').classList.add('active'); }
+
+function confirmSubmit() {
+  const unanswered = questions.filter(q => answers[q.id] === undefined).length;
+  $('confirmMessage').innerHTML = unanswered > 0
+    ? 'لديك <strong>' + unanswered + ' سؤال</strong> لم تُجب عليه بعد.<br><br>هل أنت متأكد من التسليم؟'
+    : 'هل أنت متأكد من التسليم؟ مش هتقدر تعدّل بعد كده.';
+  $('confirmModal').classList.add('active');
+}
+
+async function submitQuiz(auto) {
+  if (submitting || finished) return;
+  submitting = true; clearInterval(timerInterval);
+  const btn = $('confirmBtn'); btn.disabled = true; btn.textContent = 'جاري التسليم...';
+  try {
+    const r = await Platform.call('submitQuiz', { quizId: quizId, answers: answers });
+    showResult(r.result, auto === true);
+  } catch (e) {
+    submitting = false; btn.disabled = false; btn.textContent = 'تأكيد التسليم';
+    if (e.code === 'DUPLICATE') { showResult(null, false); return; }
+    alert(e.message + '\nجرّب تسلّم تاني.');
+  }
+}
+
+window.addEventListener('beforeunload', function (e) { if (data && !data.submitted && !finished) { e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body>
+</html>

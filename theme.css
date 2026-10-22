@@ -1,0 +1,157 @@
+/* ============================================================
+   منصة الأستاذ وائل الشيخ — الشكل العام (مشترك بين كل الصفحات)
+   الفكرة: كراسة إنجليزي — خطوط مسطرة، هامش أحمر، وحبر كحلي.
+   ============================================================ */
+:root{
+  --ink:#101a2e; --ink2:#34425a; --mute:#66738a;
+  --line:#dde2ea; --line2:#eceff4;
+  --bg:#f3f4f7; --paper:#fff;
+  --red:#c8202f; --red-d:#a31925; --red-soft:#fbeaec;
+  --gold:#f0b429; --ok:#1b7f4b; --ok-soft:#e8f5ed; --warn:#8a5a00; --warn-soft:#fdf3dc; --bad:#b42318;
+  --display:'Lalezar','Cairo',sans-serif;
+  --ruled:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#e6ebf4 31px,#e6ebf4 32px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:16px;min-height:100vh;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+svg.i{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.hide{display:none!important}
+
+/* ---------- الشريط العلوي ---------- */
+.bar{position:sticky;top:0;z-index:30;background:#fff;color:var(--ink);border-bottom:3px solid var(--red)}
+.bar-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:58px}
+.bar h1{font-family:var(--display);font-weight:400;font-size:1.3rem;line-height:1.25;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--ink);text-decoration:none;font-weight:700;font-size:.88rem;padding:6px 12px;border:1.5px solid #c5ccd8;border-radius:8px;background:#fff;white-space:nowrap}
+.back-btn:hover{border-color:var(--ink)}
+.page{max-width:760px;margin:0 auto;padding:18px 16px 56px}
+.state-box{color:var(--mute);text-align:center;padding:44px 10px;line-height:1.9}
+
+/* ---------- الأزرار ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:11px 20px;font-weight:700;font-size:.95rem;background:var(--red);color:#fff;text-decoration:none;transition:background .15s}
+.btn:hover{background:var(--red-d)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ink{background:var(--ink)}.btn.ink:hover{background:var(--ink2)}
+.btn.line{background:#fff;color:var(--ink);border:1px solid #c5ccd8}.btn.line:hover{border-color:var(--ink)}
+.btn.block{width:100%}
+
+/* ---------- حقول ---------- */
+.field{margin-bottom:12px}
+.field label{display:block;font-weight:700;font-size:.86rem;margin-bottom:5px;color:var(--ink2)}
+.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1.5px solid #cdd3de;border-radius:8px;font-size:.95rem;background:#fff;color:var(--ink);transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
+.field input.error{border-color:var(--bad);background:#fff6f5}
+.field small{display:block;color:var(--mute);font-size:.8rem;margin-top:4px}
+.ltr{direction:ltr;text-align:right}
+
+/* ---------- رسائل ---------- */
+.message,.msg-box{display:none;margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.9rem;font-weight:600;line-height:1.6;text-align:center;border:1px solid transparent}
+.message.success,.msg-box.success{display:block;background:var(--ok-soft);color:var(--ok);border-color:#b9dfc9}
+.message.error,.msg-box.error{display:block;background:#fdf1f0;color:var(--bad);border-color:#f2c4bf}
+.status-card{padding:16px;border-radius:10px;margin-bottom:14px;font-weight:600;line-height:1.8;text-align:center;border:1px solid transparent}
+.status-card.pending{background:var(--warn-soft);color:var(--warn);border-color:#ecd28e}
+.status-card.rejected{background:#fdf1f0;color:var(--bad);border-color:#f2c4bf}
+
+/* ---------- نافذة منبثقة (مشتركة) ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(16,26,46,.55);z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-overlay.active{display:flex}
+.modal-box{background:#fff;border-radius:14px;padding:24px 22px;max-width:400px;width:100%;text-align:center}
+.modal-title{font-family:var(--display);font-weight:400;font-size:1.4rem;margin-bottom:6px;line-height:1.3}
+.modal-message{color:var(--ink2);font-size:.95rem;line-height:1.8;margin-bottom:18px}
+.modal-message strong{color:var(--ink)}
+.modal-buttons{display:flex;gap:10px}
+.modal-btn{flex:1;padding:11px;border-radius:8px;font-weight:700;font-size:.95rem;border:1px solid #c5ccd8;background:#fff;color:var(--ink)}
+.modal-btn.confirm{background:var(--red);border-color:var(--red);color:#fff}
+.modal-btn.confirm:hover{background:var(--red-d)}
+.modal-btn:disabled{opacity:.6}
+
+/* ---------- شارات ---------- */
+.chip{display:inline-block;padding:1px 9px;border-radius:4px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.wait{background:var(--warn-soft);color:var(--warn)}
+.chip.red{background:var(--red-soft);color:var(--red-d)}
+.chip.gray{background:#eef0f4;color:var(--mute)}
+
+/* ============ المحاضرات ============ */
+.lecture-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.lecture-card.completed{border-color:#a9d5bb}
+.lecture-header{display:flex;align-items:flex-start;gap:14px;padding:14px 16px 14px 14px;cursor:pointer;background-image:linear-gradient(to left,transparent 58px,#f1c5ca 58px,#f1c5ca 59px,transparent 59px)}
+.lecture-number{width:36px;height:36px;border-radius:50%;border:2px solid var(--red);color:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:1.15rem;flex:none;margin-left:9px;background:#fff}
+.lecture-card.completed .lecture-number{border-color:var(--ok);color:var(--ok)}
+.lecture-card.locked .lecture-number{border-color:#b7bfcc;color:#8b95a6}
+.lecture-info{flex:1;min-width:0}
+.lecture-info h2{font-family:var(--display);font-weight:400;font-size:1.25rem;line-height:1.35}
+.lecture-info p{color:var(--mute);font-size:.85rem;line-height:1.6;margin-top:2px}
+.lecture-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.toggle-btn{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--mute);display:flex;align-items:center;justify-content:center}
+.toggle-btn svg{transition:transform .2s}
+.lecture-card.open .toggle-btn svg{transform:rotate(180deg)}
+.lecture-content{display:none;border-top:1px solid var(--line2)}
+.lecture-card.open .lecture-content{display:block}
+.warning-msg{margin:12px 16px 0;background:var(--warn-soft);border:1px solid #ecd28e;color:var(--warn);padding:9px 12px;border-radius:8px;font-size:.86rem;font-weight:600}
+.section{border-top:1px solid var(--line2)}
+.lecture-content>.section:first-child,.lecture-content>.warning-msg+.section{border-top:0}
+.section-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer}
+.section-title{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-weight:700;font-size:.95rem}
+.section-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--red-soft);color:var(--red-d);flex:none}
+.section-icon.homework{background:#e8eef9;color:#244a9a}
+.section-icon.exam{background:var(--ink);color:#fff}
+.section-right{display:flex;align-items:center;gap:8px}
+.section-status{font-size:.76rem;font-weight:700;padding:1px 8px;border-radius:4px}
+.status-done{background:var(--ok-soft);color:var(--ok)}
+.status-pending{background:var(--warn-soft);color:var(--warn)}
+.section-toggle{color:var(--mute);display:flex}
+.section-toggle svg{transition:transform .2s}
+.section.open .section-toggle svg{transform:rotate(180deg)}
+.section-body{display:none;padding:0 16px 14px}
+.section.open .section-body{display:block}
+.item-row{display:flex;flex-direction:column;gap:10px;padding:12px;background:#f7f8fa;border-radius:8px}
+.item-title{font-size:.88rem;font-weight:600;color:var(--ink2)}
+.action-btn{width:100%;padding:10px 14px;border:0;border-radius:8px;font-size:.92rem;font-weight:700;color:#fff;background:var(--red)}
+.action-btn.btn-homework{background:#244a9a}
+.action-btn.btn-exam{background:var(--ink)}
+.action-btn.done{background:var(--ok);cursor:default}
+.action-btn:disabled{background:#b7bfcc!important;cursor:not-allowed}
+
+/* ============ الدرس ============ */
+.video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.video-frame iframe,.video-frame video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.link-box{display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:20px;height:100%}
+.lesson-title{font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.35}
+.lesson-topics{color:var(--mute);font-size:.92rem;line-height:1.8;margin:2px 0 18px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+.panel>h3{font-family:var(--display);font-weight:400;font-size:1.2rem;padding:12px 16px;border-bottom:1px solid var(--line2)}
+.panel .item-row{margin:12px}
+
+/* ============ الكويز ============ */
+.quiz-bar-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-weight:700;font-size:.92rem}
+.timer{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 12px;font-weight:800;font-variant-numeric:tabular-nums}
+.timer.danger{border-color:var(--red);color:var(--red)}
+.progress-bar-container{height:5px;background:#dfe3ea;border-radius:3px;overflow:hidden;margin-bottom:14px}
+.progress-bar-fill{height:100%;background:var(--red);transition:width .25s}
+.question-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.question-image{position:relative;background-image:var(--ruled);background-color:#fff;padding:0 64px 0 18px;border-bottom:1px solid var(--line)}
+.question-image::before{content:"";position:absolute;top:0;bottom:0;right:48px;width:1px;background:#f1c5ca}
+.q-text{font-size:1.1rem;font-weight:700;line-height:32px;padding:16px 0 15px;position:relative}
+.q-img{max-width:100%;max-height:260px;border-radius:8px;margin:0 0 14px;border:1px solid var(--line)}
+.options-list{padding:12px;display:grid;gap:8px}
+.option-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s}
+.option-item:hover{border-color:#aab3c2}
+.option-letter{width:30px;height:30px;border-radius:50%;border:1.5px solid #b7bfcc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex:none;color:var(--ink2)}
+.option-text{flex:1;font-weight:600;line-height:1.5}
+.option-item.selected{border-color:var(--red);background:var(--red-soft)}
+.option-item.selected .option-letter{background:var(--red);border-color:var(--red);color:#fff}
+.nav-buttons{display:flex;gap:10px;margin-bottom:10px}
+.nav-btn{flex:1;padding:11px;border-radius:8px;font-weight:700;font-size:.95rem;border:1px solid #c5ccd8;background:#fff;color:var(--ink)}
+.nav-btn.next{background:var(--ink);border-color:var(--ink);color:#fff}
+.nav-btn:disabled{opacity:.4;cursor:default}
+.submit-btn{width:100%;padding:13px;border:0;border-radius:8px;background:var(--red);color:#fff;font-weight:800;font-size:1rem}
+.submit-btn:hover{background:var(--red-d)}
+.result-score{font-family:var(--display);font-size:2.4rem;line-height:1.2;color:var(--red);display:block;margin:6px 0}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
